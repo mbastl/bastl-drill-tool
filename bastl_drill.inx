@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
+    <_name>BASTL Drill Tool</_name>
+    <id>bastl_drill_tool</id>
+	<dependency type="executable" location="extensions">bastl_drill.py</dependency>
+	<dependency type="executable" location="extensions">inkex.py</dependency>
+
+        <param name="tab" type="notebook">
+          <page name="general" gui-text="General">
+            <param name="mode" type="enum" _gui-text="Output Format:">
+              <item value="gcd">G-Code</item>
+              <item value="exc">Excellon</item>
+            </param>
+            <param name="unit" type="enum" _gui-text="Unit:">
+              <item value="mm">mm</item>
+              <item value="in">inch</item>
+            </param>
+	    <param name="maxsize" type="float" min="0" max="200" _gui-text="Maximum drill diameter:">5</param>
+	    <param name="file" type="string" _gui-text="Filename:">e:\output.gcode</param>
+          </page>
+          <page name="gcode" gui-text="G-Code">
+<!--            <param name="style" type="enum" _gui-text="G-Code style:">
+              <item value="rs274">RS-274</item>
+              <item value="marlin">3D Printers</item>
+            </param> -->
+	    <param name="spindle-on" type="string" _gui-text="Spindle ON Command:">M03 S255</param>
+	    <param name="spindle-off" type="string" _gui-text="Spindle OFF Command:">M05</param>
+	    <param name="tool-cmd" type="string" _gui-text="Tool Change Command:"></param>
+	    <param name="stop-cmd" type="string" _gui-text="Machine STOP Command:"></param>
+	    <param name="x2" type="description" _gui-text="(For 3D printers use wait for digital IO comand)"></param>
+	    <param name="msg-cmd" type="string" _gui-text="Message Command:"></param>
+<!--	    <param name="x3" type="description" _gui-text="(used only for 3D printers)"></param> -->
+	    <param name="drill-height" type="float" min="-50" max="200" _gui-text="Drill Height:">-1</param>
+	    <param name="safe-height" type="float" min="-50" max="200" _gui-text="Safe Height:">50</param>
+	    <param name="tool-change-height" type="float" min="-50" max="200" _gui-text="Tool Change Height:">35</param>
+	    <param name="drill-speed" type="int" min="0" max="1000" _gui-text="Drill speed:">50</param>
+	    <param name="retract-speed" type="int" min="0" max="10000" _gui-text="Retract speed:">700</param>
+	    <param name="move-speed" type="int" min="0" max="10000" _gui-text="Transort speed:">5000</param>
+          </page>
+        </param>
+
+	<effect>
+		<effects-menu>
+			<submenu _name="BASTL Tools"/>
+		</effects-menu>
+		<object-type>path</object-type>
+  	</effect>
+
+	<script>
+		<command reldir="extensions" interpreter="python">bastl_drill.py</command>
+	</script>
+
+</inkscape-extension>
