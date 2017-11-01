@@ -1,4 +1,21 @@
 #!/usr/bin/env python
+"""
+Created by Milan B. (C) 2017 www.bastl.sk
+
+This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 2 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+"""
 
 import inkex
 import re
@@ -9,15 +26,7 @@ VER,1
 FMAT,2
 ICI,OFF
 """,
-'gcd_header': """G92 X0 Y0 Z0
-G90
-;--- end of default header
-""",
 'exc_footer': """M30
-""",
-'gcd_footer': """;--- start of default footer
-G28 X
-M84
 """
 }
 
@@ -26,15 +35,16 @@ class C(inkex.Effect):
   def __init__(self):
     inkex.Effect.__init__(self)
     self.OptionParser.add_option("-m", "--mode",   action="store", type="string", dest="output_mode",   default="gcd",   help="Format of output file")
-    self.OptionParser.add_option("-f", "--file",   action="store", type="string", dest="output_file",   default="e:\output.gcode",   help="Name of output file")
+    self.OptionParser.add_option("-f", "--file",   action="store", type="string", dest="output_file",   default="output.gcode",   help="Name of output file")
     self.OptionParser.add_option("-u", "--unit",   action="store", type="string", dest="unit",   default="mm",   help="Unit")
     self.OptionParser.add_option("-x", "--maxsize",   action="store", type="float", dest="maxsize",   default=5.0,   help="Maximum drill diameter")
     self.OptionParser.add_option("", "--tab",   action="store", type="string", dest="dummy_tab",   default="",   help="")
-#    self.OptionParser.add_option("-s", "--style",   action="store", type="string", dest="gcode_style",   default="marlin",   help="Stule of created G-code")
+    self.OptionParser.add_option("", "--header",   action="store", type="string", dest="gheader",   default="G92 X0 Y0 Z0|G90",   help="Program header")
+    self.OptionParser.add_option("", "--footer",   action="store", type="string", dest="gfooter",   default="G28 X|M84",   help="Program Footer")
+    self.OptionParser.add_option("", "--init-cmd",   action="store", type="string", dest="init_cmd",   default="",   help="Additional initialization")
     self.OptionParser.add_option("", "--spindle-on",   action="store", type="string", dest="spindle_on",   default="M03 S255",   help="Spindle ON Command")
     self.OptionParser.add_option("", "--spindle-off",   action="store", type="string", dest="spindle_off",   default="M05",   help="Spindle OFF Command")
     self.OptionParser.add_option("", "--tool-cmd",   action="store", type="string", dest="tool_cmd",   default="",   help="Tool Change Command")
-    self.OptionParser.add_option("", "--stop-cmd",   action="store", type="string", dest="stop_cmd",   default="",   help="Machine Stop Command")
     self.OptionParser.add_option("", "--msg-cmd",   action="store", type="string", dest="msg_cmd",   default="M117",   help="Display Message Command")
     self.OptionParser.add_option("", "--drill-height",   action="store", type="float", dest="drill_height",   default=0.0,   help="Drill Height")
     self.OptionParser.add_option("", "--safe-height",   action="store", type="float", dest="safe_height",   default=5.0,   help="Safe Height")
@@ -65,6 +75,8 @@ class C(inkex.Effect):
 
     def tool_list(drills):
       i = 0
+      if self.options.output_mode == "gcd":
+        f.write("\n")
       for d in drills:
         if self.options.output_mode == "gcd":
 	  f.write("; Tool %02d diameter: %f\n" % (40+i, d))
@@ -75,14 +87,12 @@ class C(inkex.Effect):
     def tool_change(drill_dia, index):
       if self.options.output_mode == "gcd":
         f.write("\n")
-        f.write(self.options.spindle_off+"\n")
+        f.write(self.options.spindle_off.replace("|","\n")+"\n")
         f.write("G00 Z%.3f F%d\n" % (self.options.tool_height, self.options.retract_speed))
-        f.write("%s Change Drill: %.2f%s\n" % (self.options.msg_cmd, drill_dia, self.options.unit))
+        f.write("%s Change Drill: %.2f%s\n" % (self.options.msg_cmd.replace("|","\n"), drill_dia, self.options.unit))
         if self.options.tool_cmd != "":
-	  f.write(self.options.tool_cmd+"\n")
-        if self.options.stop_cmd != "":
-          f.write(self.options.stop_cmd+"\n")
-        f.write(self.options.spindle_on+"\n")
+	  f.write(self.options.tool_cmd.replace("|","\n")+"\n")
+        f.write(self.options.spindle_on.replace("|","\n")+"\n")
         f.write("G00 Z%.3f F%d\n" % (self.options.safe_height, self.options.retract_speed))
 #        if self.options.spindle_delay != 0:
 #          f.write("G04 P%d\n" % (self.options.spindle_delay,))
@@ -96,7 +106,6 @@ class C(inkex.Effect):
 
     # Create list of circles
     scale = self.uutounit(1, self.options.unit)
-#    f.write(str(scale)+" "+self.options.unit+"\n")
     l = []
     if len(self.selected) == 0:
       svg = self.document.xpath('//svg:circle',namespaces=inkex.NSS)
@@ -118,17 +127,18 @@ class C(inkex.Effect):
     drills = []
     for t in l:
       x,y,r = t
-      #f.write(str(x)+" "+str(y)+" "+str(r)+"\n")
       if not r in drills:
         drills.append(r)
 	
     drills.sort()
     if self.options.output_mode == "gcd":
-      f.write(defaults['gcd_header'])
+      f.write(self.options.gheader.replace("|","\n")+"\n")
       if self.options.unit == "mm":
         f.write("G21\n")
       else:
         f.write("G20\n")
+      if self.options.init_cmd != "":
+        f.write(self.options.init_cmd.replace("|","\n")+"\n")
     else:
       f.write(defaults['exc_header'])
       if self.options.unit == "mm":
@@ -145,14 +155,13 @@ class C(inkex.Effect):
     for d in drills:
       tool_change(d, ix)
       drill(l,d)
-      #f.write("T00 "+str(d)+"\n")
       ix = ix+1
 
     if self.options.output_mode == "gcd":
-      f.write(self.options.spindle_off+"\n")
+      f.write(self.options.spindle_off.replace("|","\n")+"\n")
 
     if self.options.output_mode == "gcd":
-      f.write(defaults['gcd_footer'])
+      f.write(self.options.gfooter.replace("|","\n")+"\n")
     else:
       f.write(defaults['exc_footer'])
 

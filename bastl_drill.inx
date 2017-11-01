@@ -15,8 +15,8 @@
               <item value="mm">mm</item>
               <item value="in">inch</item>
             </param>
-	    <param name="maxsize" type="float" min="0" max="200" _gui-text="Maximum drill diameter:">5</param>
-	    <param name="file" type="string" _gui-text="Filename:">e:\output.gcode</param>
+	    <param name="maxsize" type="float" min="0" max="200" _gui-text="Maximum Drill Diameter:">5</param>
+	    <param name="file" type="string" _gui-text="Filename:">output.gcode</param>
           </page>
           <page name="gcode" gui-text="G-Code">
 <!--            <param name="style" type="enum" _gui-text="G-Code style:">
@@ -26,8 +26,9 @@
 	    <param name="spindle-on" type="string" _gui-text="Spindle ON Command:">M03 S255</param>
 	    <param name="spindle-off" type="string" _gui-text="Spindle OFF Command:">M05</param>
 	    <param name="tool-cmd" type="string" _gui-text="Tool Change Command:"></param>
-	    <param name="stop-cmd" type="string" _gui-text="Machine STOP Command:"></param>
-	    <param name="x2" type="description" _gui-text="(For 3D printers use wait for digital IO comand)"></param>
+	    <param name="x2" type="description">(For 3D printers use wait for digital IO comand)</param>
+	    <param name="init-cmd" type="string" _gui-text="Additional initialization:"></param>
+<!--	    	    <param name="stop-cmd" type="string" _gui-text="Machine STOP Command:"></param> -->
 	    <param name="msg-cmd" type="string" _gui-text="Message Command:"></param>
 <!--	    <param name="x3" type="description" _gui-text="(used only for 3D printers)"></param> -->
 	    <param name="drill-height" type="float" min="-50" max="200" _gui-text="Drill Height:">-1</param>
@@ -35,7 +36,11 @@
 	    <param name="tool-change-height" type="float" min="-50" max="200" _gui-text="Tool Change Height:">35</param>
 	    <param name="drill-speed" type="int" min="0" max="1000" _gui-text="Drill speed:">50</param>
 	    <param name="retract-speed" type="int" min="0" max="10000" _gui-text="Retract speed:">700</param>
-	    <param name="move-speed" type="int" min="0" max="10000" _gui-text="Transort speed:">5000</param>
+	    <param name="move-speed" type="int" min="0" max="10000" _gui-text="Transport speed:">5000</param>
+	    <param name="header" type="string" _gui-text="Program header:"></param>
+	    <param name="footer" type="string" _gui-text="Program footer:"></param>
+--	    <param name="x4" type="description">If Program Header or Program Footer are left empty,</param>
+--	    <param name="x5" type="description">reasonable and safe defaults are used</param>
           </page>
         </param>
 
