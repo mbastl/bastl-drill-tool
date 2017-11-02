@@ -67,6 +67,8 @@ class C(inkex.Effect):
         cx,cy,d = t
 	if d == dia:
           if self.options.output_mode == "gcd":
+            # experimental - add wait begore move
+            f.write("G04 P0\n")
             f.write("G00 X%.3f Y%.3f F%d\n" % (cx, cy, self.options.move_speed))
             f.write("G01 Z%.3f F%d\n" % (self.options.drill_height, self.options.drill_speed))
             f.write("G01 Z%.3f F%d\n" % (self.options.safe_height, self.options.retract_speed))
